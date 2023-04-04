@@ -23,6 +23,8 @@ import org.springframework.validation.FieldError;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -42,8 +44,8 @@ public class UserService implements UserDetailsService {
     @Autowired
     private JWTUtil jwtUtil;
 
-    public void save(User user) {
-        userRepository.save(user);
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
     public ResponseEntity<?> validateRegister(UserRegisterDto userRegisterDto, BindingResult bindingResult) {
@@ -59,14 +61,16 @@ public class UserService implements UserDetailsService {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(bindingResult.getFieldErrors(), HttpStatus.CONFLICT);
         } else {
-            registerUser(userRegisterDto);
+            User registeredUser=registerUser(userRegisterDto);
             String token = jwtUtil.generateToken(userRegisterDto.getUsername());
-
-            return new ResponseEntity<>(Collections.singletonMap("jwt-token", token), HttpStatus.ACCEPTED);
+//            Map map=new HashMap();
+//            map.put("token", token);
+//            map.put("user",registeredUser);
+            return new ResponseEntity<>(Collections.singletonMap("token",token), HttpStatus.ACCEPTED);
         }
     }
 
-    public void registerUser(UserRegisterDto userRegisterDto) {
+    public User registerUser(UserRegisterDto userRegisterDto) {
         User user = User.builder()
                 .name(userRegisterDto.getName())
                 .surname(userRegisterDto.getSurname())
@@ -76,19 +80,17 @@ public class UserService implements UserDetailsService {
                 .password(passwordEncoder.encode(userRegisterDto.getPassword()))
                 .registrationDate(LocalDate.now())
                 .build();
-        save(user);
+         return save(user);
     }
 
     public ResponseEntity<?> loginUser(CredentialsDto credentialsDto) {
         try {
             UsernamePasswordAuthenticationToken authInputToken =
                     new UsernamePasswordAuthenticationToken(credentialsDto.getUsername(), credentialsDto.getPassword());
-
             authenticationManager.authenticate(authInputToken);
-
             String token = jwtUtil.generateToken(credentialsDto.getUsername());
 
-            return new ResponseEntity<>(Collections.singletonMap("jwt-token", token), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(Collections.singletonMap("token", token), HttpStatus.ACCEPTED);
         } catch (AuthenticationException authExc) {
             throw new RuntimeException("Invalid Login Credentials");
         }
