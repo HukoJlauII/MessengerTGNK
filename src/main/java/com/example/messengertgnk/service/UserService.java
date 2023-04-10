@@ -2,6 +2,7 @@ package com.example.messengertgnk.service;
 
 import com.example.messengertgnk.configuration.JWT.JWTUtil;
 import com.example.messengertgnk.dto.CredentialsDto;
+import com.example.messengertgnk.dto.UserInfoDto;
 import com.example.messengertgnk.dto.UserRegisterDto;
 import com.example.messengertgnk.entity.Role;
 import com.example.messengertgnk.entity.User;
@@ -21,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import javax.transaction.Transactional;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +50,40 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public User findUserByUsername(String username) {
+        return userRepository.findUserByUsername(username).orElse(null);
+    }
+
+    public UserInfoDto mapToInfoDto(User user) {
+        return UserInfoDto.builder()
+                .name(user.getName())
+                .surname(user.getSurname())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .roles(user.getRoles())
+                .registrationDate(user.getRegistrationDate())
+                .avatar(user.getAvatar())
+                .build();
+    }
+
+
+    public User getUserAuth(Principal principal) {
+        return (User) loadUserByUsername(principal.getName());
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No user with username = " + username));
+    }
+
     public ResponseEntity<?> validateRegister(UserRegisterDto userRegisterDto, BindingResult bindingResult) {
         if (!userRegisterDto.getPassword().equals(userRegisterDto.getPasswordConfirm())) {
             bindingResult.addError(new FieldError("user", "passwordConfirm", "Пароли не совпадают"));
@@ -61,12 +97,9 @@ public class UserService implements UserDetailsService {
         if (bindingResult.hasErrors()) {
             return new ResponseEntity<>(bindingResult.getFieldErrors(), HttpStatus.CONFLICT);
         } else {
-            User registeredUser=registerUser(userRegisterDto);
+            User registeredUser = registerUser(userRegisterDto);
             String token = jwtUtil.generateToken(userRegisterDto.getUsername());
-//            Map map=new HashMap();
-//            map.put("token", token);
-//            map.put("user",registeredUser);
-            return new ResponseEntity<>(Collections.singletonMap("token",token), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(Collections.singletonMap("token", token), HttpStatus.ACCEPTED);
         }
     }
 
@@ -80,7 +113,7 @@ public class UserService implements UserDetailsService {
                 .password(passwordEncoder.encode(userRegisterDto.getPassword()))
                 .registrationDate(LocalDate.now())
                 .build();
-         return save(user);
+        return save(user);
     }
 
     public ResponseEntity<?> loginUser(CredentialsDto credentialsDto) {
@@ -88,25 +121,27 @@ public class UserService implements UserDetailsService {
             UsernamePasswordAuthenticationToken authInputToken =
                     new UsernamePasswordAuthenticationToken(credentialsDto.getUsername(), credentialsDto.getPassword());
             authenticationManager.authenticate(authInputToken);
+            Map map = new HashMap<>();
             String token = jwtUtil.generateToken(credentialsDto.getUsername());
-
-            return new ResponseEntity<>(Collections.singletonMap("token", token), HttpStatus.ACCEPTED);
+            map.put("token", token);
+            User user = findUserByUsername(credentialsDto.getUsername());
+            if (user != null) {
+                UserInfoDto userInfo = mapToInfoDto(user);
+                map.put("user", userInfo);
+            } else {
+                map.put("user", null);
+            }
+            return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
         } catch (AuthenticationException authExc) {
             throw new RuntimeException("Invalid Login Credentials");
         }
     }
 
-
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public ResponseEntity<?> showUserInfo(Principal principal) {
+        User user = getUserAuth(principal);
+        UserInfoDto userInfo = mapToInfoDto(user);
+        return ResponseEntity.ok(userInfo);
     }
 
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No user with username = " + username));
-    }
 }

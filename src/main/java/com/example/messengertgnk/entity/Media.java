@@ -1,26 +1,19 @@
 package com.example.messengertgnk.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
+@Builder
 @Table(name = "media", schema = "jpa")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 public class Media {
-    public Media(String originalFileName, Long size, String mediaType, byte[] bytes) {
-        this.originalFileName = originalFileName;
-        this.size = size;
-        this.mediaType = mediaType;
-        this.bytes = bytes;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

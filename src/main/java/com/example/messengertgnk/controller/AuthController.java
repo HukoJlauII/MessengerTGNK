@@ -7,7 +7,6 @@ import com.example.messengertgnk.entity.User;
 import com.example.messengertgnk.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,14 +33,7 @@ public class AuthController {
 
     @GetMapping("/info")
     public ResponseEntity<?> getUserInfo(Principal principal) {
-        User user= (User) userService.loadUserByUsername(principal.getName());
-        UserInfoDto userInfo= UserInfoDto.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .roles(user.getRoles())
-                .build();
-        return ResponseEntity.ok(userInfo);
-
+        return userService.showUserInfo(principal);
     }
 
     public record JwtResponse(String jwt, Long id, String email, String username, List<String> authorities) {
