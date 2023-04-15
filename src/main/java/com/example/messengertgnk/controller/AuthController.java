@@ -6,7 +6,9 @@ import com.example.messengertgnk.dto.UserRegisterDto;
 import com.example.messengertgnk.entity.User;
 import com.example.messengertgnk.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegisterDto userRegisterDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return new ResponseEntity<>(bindingResult.getFieldErrors(), HttpStatus.CONFLICT);
+        }
         return userService.validateRegister(userRegisterDto, bindingResult);
     }
 
@@ -32,8 +37,8 @@ public class AuthController {
     }
 
     @GetMapping("/info")
-    public ResponseEntity<?> getUserInfo(Principal principal) {
-        return userService.showUserInfo(principal);
+    public ResponseEntity<?> getUserInfo(Principal principal, Authentication authentication) {
+        return userService.showUserInfo(principal,authentication);
     }
 
     public record JwtResponse(String jwt, Long id, String email, String username, List<String> authorities) {

@@ -47,6 +47,7 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
 
+//    @NotBlank(message = "Поле не может быть пустым")
     @Transient
     @JsonIgnore
     private String passwordConfirm;
@@ -80,7 +81,7 @@ public class User implements UserDetails {
     @OneToOne(targetEntity = Media.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "avatar_id", referencedColumnName = "id")
     @JsonIgnoreProperties(value = "bytes", allowSetters = true)
-    @RestResource(exported = false)
+//    @RestResource(exported = false)
     private Media avatar;
 
     @Column(name = "last_online")

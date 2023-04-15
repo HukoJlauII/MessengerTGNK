@@ -38,7 +38,7 @@ public class MediaController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> loadMedia(Principal principal, @RequestBody MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<?> loadMedia(Principal principal, @RequestParam(value = "file") MultipartFile multipartFile,@RequestParam(value = "user", required=false ) String json) throws IOException {
         User user = userService.getUserAuth(principal);
         if (multipartFile != null) {
             Media media = Media.builder()
@@ -49,6 +49,6 @@ public class MediaController {
             user.setAvatar(media);
             userService.save(user);
         }
-        return new ResponseEntity<>(null, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.mapToInfoDto(user), HttpStatus.CREATED);
     }
 }
