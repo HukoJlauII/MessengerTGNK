@@ -4,7 +4,6 @@ package com.example.messengertgnk.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -47,7 +46,7 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
 
-//    @NotBlank(message = "Поле не может быть пустым")
+    //    @NotBlank(message = "Поле не может быть пустым")
     @Transient
     @JsonIgnore
     private String passwordConfirm;
@@ -55,7 +54,6 @@ public class User implements UserDetails {
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
-    @JsonIgnore
     private Set<Role> roles = new HashSet<>();
 
 

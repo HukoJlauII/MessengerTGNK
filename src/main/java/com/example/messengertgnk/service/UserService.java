@@ -1,6 +1,7 @@
 package com.example.messengertgnk.service;
 
 import com.example.messengertgnk.configuration.JWT.JWTUtil;
+import com.example.messengertgnk.dto.ChangePasswordDto;
 import com.example.messengertgnk.dto.CredentialsDto;
 import com.example.messengertgnk.dto.UserInfoDto;
 import com.example.messengertgnk.dto.UserRegisterDto;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +27,7 @@ import org.springframework.validation.FieldError;
 import javax.transaction.Transactional;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -138,10 +141,35 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public ResponseEntity<?> showUserInfo(Principal principal,Authentication authentication) {
+    public ResponseEntity<?> logoutUser(Authentication authentication) {
+        User user = getUserAuth(authentication);
+        user.setLastOnline(LocalDateTime.now());
+        save(user);
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("logout successfully");
+    }
+
+    public ResponseEntity<?> showUserInfo(Principal principal, Authentication authentication) {
         User user = getUserAuth(principal);
         UserInfoDto userInfo = mapToInfoDto(user);
         return ResponseEntity.ok(userInfo);
+    }
+
+    public ResponseEntity<?> changeUserPassword(ChangePasswordDto changePasswordDto, BindingResult bindingResult, Authentication authentication) {
+        User user = getUserAuth(authentication);
+
+        if (!passwordEncoder.matches(changePasswordDto.getPassword(), user.getPassword())) {
+            bindingResult.addError(new FieldError("user", "password", "Старый пароль неверный"));
+            return new ResponseEntity<>(bindingResult.getFieldErrors(), HttpStatus.CONFLICT);
+        }
+        if (!changePasswordDto.getNewPassword().equals(changePasswordDto.getNewPasswordConfirm())) {
+            bindingResult.addError(new FieldError("user", "newPasswordConfirm", "Пароли не совпадают"));
+            return new ResponseEntity<>(bindingResult.getFieldErrors(), HttpStatus.CONFLICT);
+        }
+        user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+        authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return ResponseEntity.ok(mapToInfoDto(user));
     }
 
 
