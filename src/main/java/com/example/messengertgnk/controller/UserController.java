@@ -51,12 +51,15 @@ public class UserController {
     }
 
     @PutMapping("/changeInfo")
-    public ResponseEntity<?> loadMedia(Authentication authentication, @RequestParam(value = "file", required = false) MultipartFile multipartFile, @RequestParam(value = "user", required = false) String changeUserInfo) throws IOException {
+    public ResponseEntity<?> changeUserInfo(Authentication authentication, @RequestParam(value = "file", required = false) MultipartFile multipartFile, @RequestParam(value = "user", required = false) String changeUserInfo) throws IOException {
         User user = userService.getUserAuth(authentication);
         ChangeUserDto changeUserDto = new ObjectMapper().readValue(changeUserInfo, ChangeUserDto.class);
         SpringValidatorAdapter springValidator = new SpringValidatorAdapter(validator);
         BindingResult bindingResult = new BeanPropertyBindingResult(changeUserDto, "changeUserDtoResult");
         springValidator.validate(changeUserDto, bindingResult);
+        if (!changeUserDto.getEmail().equals(user.getEmail()) && userService.existByEmail(changeUserDto.getEmail())) {
+            bindingResult.addError(new FieldError("user", "email", "Пользователь с такой почтой уже существует"));
+        }
         if (!changeUserDto.getUsername().equals(user.getUsername()) && userService.existsByUsername(changeUserDto.getUsername())) {
             bindingResult.addError(new FieldError("user", "username", "Пользователь с таким именем уже существует"));
         }

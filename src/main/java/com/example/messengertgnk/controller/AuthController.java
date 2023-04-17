@@ -39,7 +39,7 @@ public class AuthController {
     }
 
     @GetMapping("/info")
-    public ResponseEntity<?> getUserInfo(Principal principal, Authentication authentication) {
-        return userService.showUserInfo(principal, authentication);
+    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+        return userService.showUserInfo(authentication);
     }
 }

@@ -24,7 +24,6 @@ public class JWTUtil {
     @Value("${jwt.expires_in}")
     private int expiresIn;
 
-    private final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
     public String generateToken(String username) throws IllegalArgumentException, JWTCreationException {
         return JWT.create()

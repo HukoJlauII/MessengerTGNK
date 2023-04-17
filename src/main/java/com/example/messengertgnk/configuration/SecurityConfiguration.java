@@ -2,6 +2,7 @@ package com.example.messengertgnk.configuration;
 
 import com.example.messengertgnk.configuration.JWT.JWTFilter;
 import com.example.messengertgnk.configuration.JWT.JWTUtil;
+import com.example.messengertgnk.controller.CustomExceptionHandler;
 import com.example.messengertgnk.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,10 +15,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import javax.servlet.http.HttpServletResponse;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -28,7 +28,9 @@ public class SecurityConfiguration {
     private final UserService userService;
     private final JWTUtil jwtUtil;
 
-//    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+
+
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
@@ -53,12 +55,11 @@ public class SecurityConfiguration {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .exceptionHandling().authenticationEntryPoint((request, response, authException) ->
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
                 .authorizeHttpRequests()
                 .antMatchers("/api/auth/register", "/api/auth/login", "/api/media/*").permitAll()
-//                .antMatchers("/api/users").hasRole("ROLE_ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JWTFilter(userService, jwtUtil), UsernamePasswordAuthenticationFilter.class)
