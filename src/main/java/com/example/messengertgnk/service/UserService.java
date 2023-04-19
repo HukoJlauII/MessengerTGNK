@@ -26,13 +26,11 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @Service
@@ -50,6 +48,9 @@ public class UserService implements UserDetailsService {
     @Autowired
     private JWTUtil jwtUtil;
 
+    @Autowired
+    private Validator validator;
+
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -66,8 +67,13 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserByUsername(username).orElse(null);
     }
 
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
     public UserInfoDto mapToInfoDto(User user) {
         return UserInfoDto.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .surname(user.getSurname())
                 .username(user.getUsername())
@@ -116,6 +122,7 @@ public class UserService implements UserDetailsService {
                 .roles(Set.of(Role.ROLE_USER))
                 .password(passwordEncoder.encode(userRegisterDto.getPassword()))
                 .registrationDate(LocalDate.now())
+                .lastOnline(LocalDateTime.now())
                 .build();
         return save(user);
     }
@@ -125,10 +132,12 @@ public class UserService implements UserDetailsService {
         UsernamePasswordAuthenticationToken authInputToken =
                 new UsernamePasswordAuthenticationToken(credentialsDto.getUsername(), credentialsDto.getPassword());
         authenticationManager.authenticate(authInputToken);
-        Map map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         String token = jwtUtil.generateToken(credentialsDto.getUsername());
         map.put("token", token);
         User user = findUserByUsername(credentialsDto.getUsername());
+        user.setLastOnline(null);
+        save(user);
         UserInfoDto userInfo = mapToInfoDto(user);
         map.put("user", userInfo);
         return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
@@ -167,15 +176,15 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> changeUserInfo(Authentication authentication, MultipartFile multipartFile, String changeUserInfo) throws IOException {
-        User user = userService.getUserAuth(authentication);
+        User user = getUserAuth(authentication);
         ChangeUserDto changeUserDto = new ObjectMapper().readValue(changeUserInfo, ChangeUserDto.class);
         SpringValidatorAdapter springValidator = new SpringValidatorAdapter(validator);
         BindingResult bindingResult = new BeanPropertyBindingResult(changeUserDto, "changeUserDtoResult");
         springValidator.validate(changeUserDto, bindingResult);
-        if (!changeUserDto.getEmail().equals(user.getEmail()) && userService.existByEmail(changeUserDto.getEmail())) {
+        if (!changeUserDto.getEmail().equals(user.getEmail()) && existsByEmail(changeUserDto.getEmail())) {
             bindingResult.addError(new FieldError("user", "email", "Пользователь с такой почтой уже существует"));
         }
-        if (!changeUserDto.getUsername().equals(user.getUsername()) && userService.existsByUsername(changeUserDto.getUsername())) {
+        if (!changeUserDto.getUsername().equals(user.getUsername()) && existsByUsername(changeUserDto.getUsername())) {
             bindingResult.addError(new FieldError("user", "username", "Пользователь с таким именем уже существует"));
         }
         if (bindingResult.hasErrors()) {
@@ -197,8 +206,8 @@ public class UserService implements UserDetailsService {
                     .bytes(multipartFile.getBytes()).build();
             user.setAvatar(media);
         }
-        userService.save(user);
-        return new ResponseEntity<>(userService.mapToInfoDto(user), HttpStatus.OK);
+        save(user);
+        return new ResponseEntity<>(mapToInfoDto(user), HttpStatus.OK);
     }
 
 

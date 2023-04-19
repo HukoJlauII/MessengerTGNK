@@ -11,11 +11,13 @@ import java.time.LocalDateTime;
 @Table(name = "messages", schema = "jpa")
 @Getter
 @Setter
-@RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @ToString
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Message {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

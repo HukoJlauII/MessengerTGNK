@@ -18,6 +18,8 @@ import java.util.Set;
 @Builder
 public class UserInfoDto implements Serializable {
 
+    private Long id;
+
     private final String username;
     private final Set<Role> roles;
     private final String email;

@@ -4,6 +4,7 @@ package com.example.messengertgnk.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -79,7 +80,7 @@ public class User implements UserDetails {
     @OneToOne(targetEntity = Media.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "avatar_id", referencedColumnName = "id")
     @JsonIgnoreProperties(value = "bytes", allowSetters = true)
-//    @RestResource(exported = false)
+    @RestResource(exported = false)
     private Media avatar;
 
     @Column(name = "last_online")

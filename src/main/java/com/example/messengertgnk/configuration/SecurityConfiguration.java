@@ -2,7 +2,6 @@ package com.example.messengertgnk.configuration;
 
 import com.example.messengertgnk.configuration.JWT.JWTFilter;
 import com.example.messengertgnk.configuration.JWT.JWTUtil;
-import com.example.messengertgnk.controller.CustomExceptionHandler;
 import com.example.messengertgnk.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +28,6 @@ public class SecurityConfiguration {
     private final JWTUtil jwtUtil;
 
     private final AuthenticationEntryPoint authenticationEntryPoint;
-
 
 
     @Bean
@@ -59,7 +57,7 @@ public class SecurityConfiguration {
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
                 .authorizeHttpRequests()
-                .antMatchers("/api/auth/register", "/api/auth/login", "/api/media/*").permitAll()
+                .antMatchers("/api/auth/register", "/api/auth/login", "/api/media/*", "/chat/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JWTFilter(userService, jwtUtil), UsernamePasswordAuthenticationFilter.class)

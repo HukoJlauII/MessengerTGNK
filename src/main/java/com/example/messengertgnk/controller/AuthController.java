@@ -11,7 +11,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -29,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody CredentialsDto credentialsDto, Authentication authentication) {
+    public ResponseEntity<?> loginUser(@RequestBody CredentialsDto credentialsDto) {
         return userService.loginUser(credentialsDto);
     }
 
