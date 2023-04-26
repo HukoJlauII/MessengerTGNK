@@ -43,7 +43,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Поле не может быть пустым")
     @Size(min = 8, message = "Пароль должен содержать минимум 8 символов")
-    @Column(name = "password", length = 255)
+    @Column(name = "password")
     @JsonIgnore
     private String password;
 
@@ -56,7 +56,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "session_id", length = 255, unique = true)
+    @Column(name = "session_id", unique = true)
     private String sessionId;
 
 

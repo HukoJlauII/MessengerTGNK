@@ -4,12 +4,12 @@ WORKDIR $APP_HOME
 COPY build.gradle settings.gradle $APP_HOME
 
 COPY gradle $APP_HOME/gradle
-COPY --chown=gradle:gradle src/main/resources/sql /home/gradle/src
+COPY --chown=gradle:gradle . /home/gradle/src
 USER root
 RUN chown -R gradle /home/gradle/src
 
 RUN gradle build || return 0
-COPY src/main/resources/sql .
+COPY . .
 RUN gradle clean build
 
 FROM amazoncorretto:17

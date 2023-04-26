@@ -44,9 +44,7 @@ public class MessageController {
         User user = userService.getUserAuth(authentication);
         List<User> users = userService.findAll();
         List<Message> messages =
-                users.stream().filter((receiver) -> messageService.findMessageBySenderAndReceiverOrderBySendTime(user, receiver).isPresent()).map((receiver) -> {
-                    return messageService.findMessageBySenderAndReceiverOrderBySendTime(user, receiver).get();
-                }).toList();
+                users.stream().filter((receiver) -> messageService.findMessageBySenderAndReceiverOrderBySendTime(user, receiver).isPresent()).map((receiver) -> messageService.findMessageBySenderAndReceiverOrderBySendTime(user, receiver).get()).toList();
         return ResponseEntity.ok(messages);
     }
 }

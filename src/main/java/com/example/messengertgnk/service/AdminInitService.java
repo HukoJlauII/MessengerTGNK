@@ -20,7 +20,7 @@ public class AdminInitService implements CommandLineRunner {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (!userService.existsByUsername("Admin")) {
             User user = User.builder()
                     .username("Admin")
