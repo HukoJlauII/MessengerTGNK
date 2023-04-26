@@ -67,6 +67,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findUserByUsername(username).orElse(null);
     }
 
+    public User findUserBySessionId(String sessionId) {
+        return userRepository.findUserBySessionId(sessionId).orElse(null);
+    }
+
     public List<User> findAll() {
         return userRepository.findAll();
     }
@@ -113,7 +117,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public User registerUser(UserRegisterDto userRegisterDto) {
+    public void registerUser(UserRegisterDto userRegisterDto) {
         User user = User.builder()
                 .name(userRegisterDto.getName())
                 .surname(userRegisterDto.getSurname())
@@ -124,7 +128,7 @@ public class UserService implements UserDetailsService {
                 .registrationDate(LocalDate.now())
                 .lastOnline(LocalDateTime.now())
                 .build();
-        return save(user);
+        save(user);
     }
 
     public ResponseEntity<?> loginUser(CredentialsDto credentialsDto) {
@@ -136,7 +140,6 @@ public class UserService implements UserDetailsService {
         String token = jwtUtil.generateToken(credentialsDto.getUsername());
         map.put("token", token);
         User user = findUserByUsername(credentialsDto.getUsername());
-        user.setLastOnline(null);
         save(user);
         UserInfoDto userInfo = mapToInfoDto(user);
         map.put("user", userInfo);
@@ -144,13 +147,6 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public ResponseEntity<?> logoutUser(Authentication authentication) {
-        User user = getUserAuth(authentication);
-        user.setLastOnline(LocalDateTime.now());
-        save(user);
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("logout successfully");
-    }
 
     public ResponseEntity<?> showUserInfo(Authentication authentication) {
         User user = getUserAuth(authentication);

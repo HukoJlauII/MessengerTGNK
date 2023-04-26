@@ -47,7 +47,6 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
 
-    //    @NotBlank(message = "Поле не может быть пустым")
     @Transient
     @JsonIgnore
     private String passwordConfirm;
@@ -56,6 +55,9 @@ public class User implements UserDetails {
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "session_id", length = 255, unique = true)
+    private String sessionId;
 
 
     @Email(message = "Поле должно иметь формат эл.почты")

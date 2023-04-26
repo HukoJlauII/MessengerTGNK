@@ -20,7 +20,7 @@ public class MessageService {
     }
 
     public Optional<Message> findMessageBySenderAndReceiverOrderBySendTime(User sender, User receiver) {
-        return messageRepository.findMessageBySenderAndReceiverOrderBySendTime(sender.getId(), receiver.getId());
+        return messageRepository.findMessagesBySenderAndReceiverOrderBySendTimeDesc(sender.getId(), receiver.getId()).stream().findFirst();
     }
 
     public void deleteMessageById(Long id) {

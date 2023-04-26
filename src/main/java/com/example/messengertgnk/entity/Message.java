@@ -26,11 +26,13 @@ public class Message {
     @RestResource(exported = false)
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "sender_id")
+    @JsonIgnoreProperties(value = "registrationDate")
     private User sender;
 
     @RestResource(exported = false)
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "receiver_id")
+    @JsonIgnoreProperties(value = "registrationDate")
     private User receiver;
 
     private String content;

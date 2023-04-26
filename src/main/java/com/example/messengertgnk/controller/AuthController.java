@@ -32,10 +32,6 @@ public class AuthController {
         return userService.loginUser(credentialsDto);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(Authentication authentication) {
-        return userService.logoutUser(authentication);
-    }
 
     @GetMapping("/info")
     public ResponseEntity<?> getUserInfo(Authentication authentication) {

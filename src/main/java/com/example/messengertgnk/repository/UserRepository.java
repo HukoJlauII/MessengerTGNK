@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 
-//@Secured("ROLE_ADMIN")
-
 @Repository
 @CrossOrigin(origins = "http://localhost:3000")
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
@@ -25,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     Optional<User> findUserByUsername(String username);
+
+    Optional<User> findUserBySessionId(String sessionId);
 
     @Query("""
             select u from User u
