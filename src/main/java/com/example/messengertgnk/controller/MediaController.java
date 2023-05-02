@@ -2,7 +2,6 @@ package com.example.messengertgnk.controller;
 
 import com.example.messengertgnk.entity.Media;
 import com.example.messengertgnk.service.MediaService;
-import com.example.messengertgnk.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
@@ -18,9 +17,6 @@ public class MediaController {
 
     @Autowired
     private MediaService mediaService;
-
-    @Autowired
-    private UserService userService;
 
     @GetMapping("/{id}")
     private ResponseEntity<?> getImageById(@PathVariable Long id) {
